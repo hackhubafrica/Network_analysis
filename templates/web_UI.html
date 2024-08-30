@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Packet Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px auto;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        tbody tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        #loading {
+            text-align: center;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <h1>Latest Packets</h1>
+    <table id="packets-table">
+        <thead>
+            <tr>
+                <th>Timestamp</th>
+                <th>Source IP</th>
+                <th>Destination IP</th>
+                <th>Source Port</th>
+                <th>Destination Port</th>
+                <th>Length</th>
+                <th>Payload</th>
+            </tr>
+        </thead>
+        <tbody id="packets-body">
+            <!-- Packets will be inserted here dynamically -->
+        </tbody>
+    </table>
+
+    <div id="loading" style="display: none;">Loading more packets...</div>
+
+    <script>
+        let page = 1;
+        const perPage = 20;
+        let isLoading = false;
+
+        function loadPackets() {
+            if (isLoading) return;
+            isLoading = true;
+            document.getElementById('loading').style.display = 'block';
+
+            fetch(`/packets?page=${page}`)
+                .then(response => response.json())
+                .then(data => {
+                    const tableBody = document.getElementById('packets-body');
+                    data.packets.forEach(packet => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${packet[1]}</td>
+                            <td>${packet[2]}</td>
+                            <td>${packet[3]}</td>
+                            <td>${packet[4]}</td>
+                            <td>${packet[5]}</td>
+                            <td>${packet[6]}</td>
+                            <td>${packet[7]}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+
+                    isLoading = false;
+                    page++;
+                    document.getElementById('loading').style.display = 'none';
+                });
+        }
+
+        window.addEventListener('scroll', () => {
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 50) {
+                loadPackets();
+            }
+        });
+
+        loadPackets();  // Load initial packets
+    </script>
+</body>
+</html>
